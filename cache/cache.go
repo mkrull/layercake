@@ -6,23 +6,21 @@ import (
 	"time"
 )
 
-var shards = 64
+var (
+	shards = 64
+)
 
-type CacheEntry struct {
-	Value interface{}
-}
-
-type cacheShard struct {
-	Entries map[string]CacheEntry
+type shard struct {
+	Entries map[string]interface{}
 	sync.RWMutex
 }
 
-type Cache []*cacheShard
+type Cache []*shard
 
 func New() Cache {
 	c := make(Cache, shards)
 	for i := 0; i < shards; i++ {
-		c[i] = &cacheShard{Entries: make(map[string]CacheEntry)}
+		c[i] = &shard{Entries: make(map[string]interface{})}
 	}
 	return c
 }
@@ -31,7 +29,7 @@ func (c *Cache) Set(key string, value interface{}) {
 	s := c.getShard(key)
 	s.Lock()
 	defer s.Unlock()
-	e := CacheEntry{Value: value}
+	e := value
 	s.Entries[key] = e
 }
 
@@ -39,10 +37,7 @@ func (c *Cache) SetWithTTL(key string, value interface{}, ttl int) {
 	s := c.getShard(key)
 	s.Lock()
 	defer s.Unlock()
-	e := CacheEntry{
-		Value: value,
-	}
-
+	e := value
 	timeout := time.Tick(time.Second * time.Duration(ttl))
 	s.Entries[key] = e
 	go func() {
@@ -56,7 +51,7 @@ func (c *Cache) SetWithTTL(key string, value interface{}, ttl int) {
 	}()
 }
 
-func (c *Cache) getShard(key string) *cacheShard {
+func (c *Cache) getShard(key string) *shard {
 	h := fnv.New32()
 	h.Write([]byte(key))
 	return (*c)[uint(h.Sum32())%uint(shards)]
@@ -68,7 +63,7 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	defer s.RUnlock()
 
 	v, ok := s.Entries[key]
-	return v.Value, ok
+	return v, ok
 }
 
 func (c *Cache) Remove(key string) {
