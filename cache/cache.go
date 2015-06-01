@@ -50,6 +50,7 @@ func (c *Cache) SetWithTTL(key string, value interface{}, ttl int) {
 			select {
 			case <-timeout:
 				c.Remove(key)
+				return
 			}
 		}
 	}()
