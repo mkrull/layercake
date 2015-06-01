@@ -183,6 +183,79 @@ func TestStats(t *testing.T) {
 
 }
 
+func TestStatsTTL(t *testing.T) {
+	key := "testKey"
+	value := "testValue"
+	ttl := 2
+
+	c := New()
+
+	for i := 0; i < 100; i++ {
+		c.SetWithTTL(key+strconv.Itoa(i), value, ttl)
+	}
+
+	s := c.GetStats()
+
+	if s == nil {
+		t.Error("Stats should not be nil")
+		t.Fail()
+	}
+
+	if s.Set != 100 {
+		t.Errorf("Expected 100 values to be set. Got %d", s.Set)
+		t.Fail()
+	}
+
+	for i := 0; i < 100; i++ {
+		c.Get(key + strconv.Itoa(i))
+	}
+
+	s = c.GetStats()
+
+	if s == nil {
+		t.Error("Stats should not be nil")
+		t.Fail()
+	}
+
+	if s.Hits != 100 {
+		t.Errorf("Expected 100 cache hits. Got %d", s.Hits)
+		t.Fail()
+	}
+
+	for i := 0; i < 100; i++ {
+		c.Remove(key + strconv.Itoa(i))
+	}
+
+	s = c.GetStats()
+
+	if s == nil {
+		t.Error("Stats should not be nil")
+		t.Fail()
+	}
+
+	if s.Removed != 100 || s.Removed != s.Set {
+		t.Errorf("Expected 100 values to be removed. Got %d", s.Removed)
+		t.Fail()
+	}
+
+	for i := 0; i < 100; i++ {
+		c.Get(key + strconv.Itoa(i))
+	}
+
+	s = c.GetStats()
+
+	if s == nil {
+		t.Error("Stats should not be nil")
+		t.Fail()
+	}
+
+	if s.Misses != 100 {
+		t.Errorf("Expected 100 cache misses. Got %d", s.Misses)
+		t.Fail()
+	}
+
+}
+
 func BenchmarkCache(b *testing.B) {
 	c := New()
 

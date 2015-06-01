@@ -57,6 +57,7 @@ func (c *Cache) SetWithTTL(key string, value interface{}, ttl int) {
 	e := value
 	timeout := time.Tick(time.Second * time.Duration(ttl))
 	s.Entries[key] = e
+	s.Stats.Set++
 	go func() {
 		for {
 			select {
