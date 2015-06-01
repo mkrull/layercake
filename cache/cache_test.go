@@ -222,9 +222,7 @@ func TestStatsTTL(t *testing.T) {
 		t.Fail()
 	}
 
-	for i := 0; i < 100; i++ {
-		c.Remove(key + strconv.Itoa(i))
-	}
+	time.Sleep(3 * time.Second)
 
 	s = c.GetStats()
 
