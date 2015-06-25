@@ -26,12 +26,12 @@ type Stats struct {
 
 type Cache []*shard
 
-func New() Cache {
+func New() *Cache {
 	c := make(Cache, shards)
 	for i := 0; i < shards; i++ {
 		c[i] = NewShard()
 	}
-	return c
+	return &c
 }
 
 func NewShard() *shard {
