@@ -77,7 +77,7 @@ func TestSetTyped(t *testing.T) {
 func TestSetWithTTL(t *testing.T) {
 	key := "testKey"
 	value := "testValue"
-	ttl := 2
+	ttl := 10 * time.Millisecond
 
 	c := New()
 
@@ -101,7 +101,7 @@ func TestSetWithTTL(t *testing.T) {
 		t.Fail()
 	}
 
-	time.Sleep(3 * time.Second)
+	time.Sleep(15 * time.Millisecond)
 
 	v, ok = c.Get(key)
 
@@ -186,7 +186,7 @@ func TestStats(t *testing.T) {
 func TestStatsTTL(t *testing.T) {
 	key := "testKey"
 	value := "testValue"
-	ttl := 2
+	ttl := 100 * time.Millisecond
 
 	c := New()
 
@@ -222,7 +222,7 @@ func TestStatsTTL(t *testing.T) {
 		t.Fail()
 	}
 
-	time.Sleep(3 * time.Second)
+	time.Sleep(150 * time.Millisecond)
 
 	s = c.GetStats()
 

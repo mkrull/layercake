@@ -70,7 +70,7 @@ func (c *Cache) Set(key string, value interface{}) {
 
 // SetWithTTL stores the value with the given key and removes it automatically after
 // ttl seconds.
-func (c *Cache) SetWithTTL(key string, value interface{}, ttl int) {
+func (c *Cache) SetWithTTL(key string, value interface{}, ttl time.Duration) {
 	s := c.getShard(key)
 	s.Lock()
 	defer s.Unlock()
@@ -88,12 +88,11 @@ func (c *Cache) SetWithTTL(key string, value interface{}, ttl int) {
 	s.Entries[key] = e
 	s.Stats.Set++
 
-	timeout := time.Tick(time.Second * time.Duration(ttl))
 	// wait for the timeout concurrently
 	go func() {
 		for {
 			select {
-			case <-timeout:
+			case <-time.After(ttl):
 				c.Remove(key)
 				return
 			case <-e.exit:
